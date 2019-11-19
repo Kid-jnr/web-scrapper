@@ -1,0 +1,17 @@
+{
+  "name": "web-scrapper",
+  "version": "1.0.0",
+  "description": "a web scrapper",
+  "main": "index.js",
+  "scripts": {
+    "start": "index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "Norman",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0"
+  }
+}
