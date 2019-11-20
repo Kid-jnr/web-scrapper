@@ -68,7 +68,7 @@ const listSeries = (label)=>{
                 scrapPages(`https://o2tvseries.com/${label}/page${i}.html`)
                     .then((data) =>{
                         labelList.push(data) //// this doesnt work for some reason X(
-                        console.log(allSeriesArr)   ////this logs all the scrapped items 
+                        console.log(data)   ////this logs all the scrapped items 
                     })         
             }
 
