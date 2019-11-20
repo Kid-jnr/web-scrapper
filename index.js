@@ -7,6 +7,9 @@ app.listen(port, ()=>{
     console.log(` listening on port ${port}`)
 });
 
+app.get('/[0-9]', (req, res)=>{
+    res.send("hello")
+})
 
 app.get('/', (req, res)=>{
     
