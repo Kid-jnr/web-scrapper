@@ -49,36 +49,42 @@ const loadMovies = () =>{
 }
 
 // FUNCTION THAT LOADS A COMPLETE LIST OF SERIES FROM A SPECIFIED LABEL(CAT)
-const listSeries = (label)=>{
+ const listSeries = async (label)=>{
     return fetch(`https://o2tvseries.com/${label}`, options)
-    .then(res => res.text())
-        .then( body =>{
-            const $ = cheerio.load(body)
-            const header = $('.header_bar').text().trim();
+        .then(res => res.text())
+            .then( body =>{
+                const $ = cheerio.load(body)
+                const header = $('.header_bar').text().trim();
 
-            // SELECT THE LAST PAGE LINK GET THE LAST PAGE NUMBER FROM THE LINK USING A REGEX AND SELECT THE SECOND ITEM IN THE ARRAY
-            // CUS ITS THE PAGE NUMBER
-            //  AND WITH IT WE CAN ITERATE THROUGH ALL THE PAGES FROM 1-LASTPAGE
-            const lastPage = $('.page_nav').children().last().attr('href').match(/[0-9]+/g)[1];
-            
-            const labelList = [];
+                // SELECT THE LAST PAGE LINK GET THE LAST PAGE NUMBER FROM THE LINK USING A REGEX AND SELECT THE SECOND ITEM IN THE ARRAY
+                // CUS ITS THE PAGE NUMBER
+                //  AND WITH IT WE CAN ITERATE THROUGH ALL THE PAGES FROM 1-LASTPAGE
+                const lastPage = $('.page_nav').children().last().attr('href').match(/[0-9]+/g)[1];
+                const labelList = [];
 
-            for ( i = 1; i <= lastPage; i++) {
-
+                // for loop is meant to run before console.log('hi") so that it can update the labelList before returning it
+                // But it does not for some reason
+            for ( i = 16; i <= parseInt(lastPage); i++) {
                 scrapPages(`https://o2tvseries.com/${label}/page${i}.html`)
                     .then((data) =>{
-                        labelList.push(data) //// this doesnt work for some reason X(
-                        console.log(data)   ////this logs all the scrapped items 
-                    })         
-            }
+                        console.table(data)
+                        data.forEach((element)  => {
+                            // console.log(element)
+                            labelList.push(element)
 
-            return {
-                header,
-                labelList,
-            }
-           
+                        }); 
+                    }).catch(err => console.log(err))
+                        
+                }
+                console.log('hi')
+  
+                return {
+                    header,
+                    labelList
+                }
+            
 
-        })
+            })
         .catch(err =>  err)
     }
 
@@ -88,7 +94,7 @@ const scrapPages = (link) =>{
         .then(res => res.text())
             .then( body =>{
                 const $ = cheerio.load(body)
-                const pagesArr= []
+                const pagesArr= [];
                 $('.data_list .data').each((i, element)=>{
 
                     const $element = $(element);
@@ -99,7 +105,7 @@ const scrapPages = (link) =>{
                         name: $name,
                         link: $link
                     }
-                    pagesArr.push(movie)
+                   pagesArr.push(movie)
                 });
                     return pagesArr
             })
