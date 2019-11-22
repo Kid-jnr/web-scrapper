@@ -62,21 +62,17 @@ const loadMovies = () =>{
                 const lastPage = $('.page_nav').children().last().attr('href').match(/[0-9]+/g)[1];
                 const labelList = [];
 
-                // for loop is meant to run before console.log('hi") so that it can update the labelList before returning it
-                // But it does not for some reason
             for ( i = 1; i <= parseInt(lastPage); i++) {
                await scrapPages(`https://o2tvseries.com/${label}/page${i}.html`)
                     .then((data) =>{
                         console.table(data)
                         data.forEach((element)  => {
-                            // console.log(element)
                             labelList.push(element)
 
                         }); 
                     }).catch(err => console.log(err))
                         
                 }
-                console.log('hi')
   
                 return {
                     header,
