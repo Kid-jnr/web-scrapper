@@ -50,9 +50,9 @@ const loadMovies = () =>{
 
 // FUNCTION THAT LOADS A COMPLETE LIST OF SERIES FROM A SPECIFIED LABEL(CAT)
  const listSeries = async (label)=>{
-    return fetch(`https://o2tvseries.com/${label}`, options)
+    return await fetch(`https://o2tvseries.com/${label}`, options)
         .then(res => res.text())
-            .then( body =>{
+            .then(async body =>{
                 const $ = cheerio.load(body)
                 const header = $('.header_bar').text().trim();
 
@@ -64,8 +64,8 @@ const loadMovies = () =>{
 
                 // for loop is meant to run before console.log('hi") so that it can update the labelList before returning it
                 // But it does not for some reason
-            for ( i = 16; i <= parseInt(lastPage); i++) {
-                scrapPages(`https://o2tvseries.com/${label}/page${i}.html`)
+            for ( i = 1; i <= parseInt(lastPage); i++) {
+               await scrapPages(`https://o2tvseries.com/${label}/page${i}.html`)
                     .then((data) =>{
                         console.table(data)
                         data.forEach((element)  => {
