@@ -1,4 +1,0 @@
-All my thoughts go here ps
-like a documentation of some sort 
-
-i used nodemon for devlopment just incase :)
