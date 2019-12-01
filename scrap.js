@@ -18,8 +18,11 @@ const latestRelease = async () =>{
 
         const recentRelease = [];   
         $('.data_list div').each( (i, element) => {
-            const item = $(element).text().trim();
-            recentRelease.push(item);
+            const $element = $(element);
+            const name = $element.find('b:nth-child(1)').text().trim()
+            const season = $element.find('b:nth-child(2)').text().trim()
+            const episode = $element.contents().last().text().trim()
+            recentRelease.push({name, season, episode});
         });
 
         return {
@@ -32,70 +35,6 @@ const latestRelease = async () =>{
             
 }
 
-// FUNCTION THAT LOADS A COMPLETE LIST OF SERIES FROM A SPECIFIED LABEL(CAT)
-// Remeber to remove this function as because we are getting all the movies 
-// sending it to a database then sort them from there its more efficient
-
-const listSeries = async (label)=>{
-    try{
-        const response = await fetch(`https://o2tvseries.com/${label}`, options)
-        const body = await response.text()
-        const $ = cheerio.load(body)
-        
-        const header = $('.header_bar').text().trim();
-
-        // SELECT THE LAST PAGE LINK GET THE LAST PAGE NUMBER FROM THE LINK USING A REGEX AND SELECT THE SECOND ITEM IN THE ARRAY
-        // CUS ITS THE PAGE NUMBER
-        //  AND WITH IT WE CAN ITERATE THROUGH ALL THE PAGES FROM 1-LASTPAGE
-        const lastPage = $('.page_nav').children().last().attr('href').match(/[0-9]+/g)[1];
-        const labelList = [];
-
-        for ( i = 1; i <= parseInt(lastPage); i++) {
-            const data = await scrapPages(`https://o2tvseries.com/${label}/page${i}.html`)
-            data.forEach((element)  => {
-                labelList.push(element)
-
-            });
-        }
-            return {
-                header,
-                labelList
-            }
-    }
-    catch(err){
-        console.log(err)
-    }
-}
-
-
-const scrapPages = async(link) =>{
-    try{
-        const response = await fetch(link, options)
-        const body = await response.text()
-        const $ = cheerio.load(body)
-
-        const pagesArr= [];
-        $('.data_list .data').each((i, element)=>{
-
-            const $element = $(element);
-            const $link = $element.find('a').attr('href');
-            const $name = $element.find('a').text();
-
-            const movie = {
-                name: $name,
-                link: $link
-            }
-            pagesArr.push(movie)
-        });
-        
-        return pagesArr
-    }
-    catch(err){
-        console.log(err)
-    }
-}
-
-
 ///This function gets a list of all the genres available
 const listGenres = async() =>{
     try{
@@ -106,14 +45,9 @@ const listGenres = async() =>{
 
         $('.data_list .data').each((i, element)=>{
             const $element = $(element);
-            const $link = $element.find('a').attr('href');
             const $name = $element.find('a').text();
 
-            const genre = {
-                name: $name,
-                link: $link
-            }
-            genreArr.push(genre)
+            genreArr.push($name)
         }); 
         
         return {genreArr} 
@@ -139,10 +73,16 @@ const listAllSeries =async () =>{
             allSeriesLinkArr.push({link:$link})       
         }); 
 
-        /// will be comparing with allserieslinkarr.length but because of size we pick the 1st 50
-        for (let i = 0; i <= 50; i++) {
-            const request = await getAllInfo(allSeriesLinkArr[i].link)                     
-            allSeriesInfo.push(request)
+        // breaking the links into chunks to avoid socket hangup error
+        var i = 0
+        while (i < allSeriesLinkArr.length ) {
+            const requests = allSeriesLinkArr.slice(i, i + 50).map(url => getAllInfo(url.link));
+            const seriesData = await Promise.all(requests)
+
+            seriesData.forEach( data =>{
+                allSeriesInfo.push(data)
+            })
+            i+= 50
         }
 
         return {allSeriesInfo}
@@ -162,23 +102,29 @@ const getAllInfo = async (link) =>{
         const movieLink = link
         const $IMBD = $('.season_name a').attr('href');
         const $name = $('.serial_name').text().trim()
-        const $image = $('.tv_series_info .img img').attr('src').trim()
-        const $cast = $('.other_info div:nth-child(1) .value').text().trim()
-        const $genre = $('.other_info div:nth-child(2) .value a').text().trim() /// fix the comma issue with output
+        const $image = $('.tv_series_info .img img').attr('src')
+        const $cast = $('.other_info div:nth-child(1) .value').text().trim()  
+        const $genre = $('.other_info div:nth-child(2) .value').text().trim() 
         const $runTime = $('.other_info div:nth-child(3) .value').text().trim()
-        const $rating = $('.other_info div:nth-child(5) .value').text().trim()
         const $seasons = $('.other_info div:nth-child(6) .value').text().trim()
+        const $seasonLinks = []
+
+        $('.data_list .data').each((i,element) => {
+            const $element = $(element);
+            const $link = $element.find('a').attr('href').trim();
+            $seasonLinks.push( $link)     
+        }); 
 
         const series = {
             name: $name,
             genre: $genre,
             image: $image,
             runtime: $runTime,
-            rating: $rating,
             seasons: $seasons,
             cast: $cast,
             link: movieLink,
-            IMBD: $IMBD
+            IMBD: $IMBD,
+            seasonLinks: $seasonLinks.reverse()
         };
         return series
     }
@@ -187,10 +133,8 @@ const getAllInfo = async (link) =>{
     }
 }
 
-
 module.exports = {
     latestRelease,
-    listSeries,
     listGenres,
     listAllSeries
 }
