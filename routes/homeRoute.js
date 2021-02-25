@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router();
-const scraper = require('../scrap');
+const getLatest = require('../scripts/getLatest');
 
 /// Get Home Route
 router.get('/', (req, res)=>{
-    scraper.latestRelease()
+    getLatest()
         .then(data => res.json(data))
 })
 

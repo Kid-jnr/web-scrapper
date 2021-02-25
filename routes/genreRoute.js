@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router();
-const scraper = require('../scrap')
+const getGenre = require('../scripts/getGenre');
 
 /// you will get a list of genre here
 router.get('/', (req, res)=>{
-    scraper.listGenres()
+    getGenre()
         .then(data => res.json(data))
 })
 

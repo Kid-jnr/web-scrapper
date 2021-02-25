@@ -1,10 +1,10 @@
 const express = require('express')
 const router = express.Router();
-const scraper = require('../scrap')
+const getAllSeries = require('../scripts/getAllSeries');
 
 /// you will get a list of All series here
 router.get('/', (req, res)=>{
-    scraper.listAllSeries()
+    getAllSeries()
         .then(data => res.json(data))
 })
 
