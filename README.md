@@ -4,6 +4,6 @@ It returns its result in json format<br><br><br>
 
 # Routes<br><br>
 
-'/' is the home route<br>
+'/' is the home route it returns the latest series<br>
 '/genre' returns a list of available genre<br>
 '/AllSeries', returns all the series available<br>
